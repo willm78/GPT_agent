@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineer Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #2a6595;
+            --secondary-color: #f0f4f8;
+            --accent-color: #e98024;
+            --text-color: #333;
+            --background-color: #ffffff;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+        }
+        header p {
+            margin-top: 5px;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+            gap: 20px;
+        }
+        section {
+            background-color: var(--background-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 320px;
+            box-sizing: border-box;
+        }
+        section h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        /* To-Do List Styles */
+        #todo-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        #new-task-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #add-task-button {
+            padding: 8px 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #add-task-button:hover {
+            background-color: #1f4e70;
+        }
+        #todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .todo-text {
+            flex: 1;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        .todo-text.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        .delete-button {
+            background: none;
+            border: none;
+            color: #d9534f;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        /* Quote Section Styles */
+        #quote-section blockquote {
+            font-style: italic;
+            margin: 0 0 5px 0;
+            line-height: 1.4;
+        }
+        #quote-section cite {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+        #new-quote-button {
+            padding: 8px 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #new-quote-button:hover {
+            background-color: #c5681c;
+        }
+        /* GitHub Section Styles */
+        #repo-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
+        .repo-item {
+            margin-bottom: 10px;
+        }
+        .repo-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .repo-item a:hover {
+            text-decoration: underline;
+        }
+        #load-repos-button {
+            padding: 8px 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        #load-repos-button:hover {
+            background-color: #1f4e70;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9rem;
+            background-color: var(--primary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Engineer Dashboard</h1>
+        <p>Enhance your productivity and curiosity</p>
+    </header>
+    <main>
+        <section id="todo-section">
+            <h2>To‑Do List</h2>
+            <div id="todo-controls">
+                <input type="text" id="new-task-input" placeholder="Enter a new task...">
+                <button id="add-task-button">Add</button>
+            </div>
+            <ul id="todo-list"></ul>
+        </section>
+        <section id="quote-section">
+            <h2>Random Quote</h2>
+            <blockquote id="quote-text">Loading quote...</blockquote>
+            <cite id="quote-author"></cite>
+            <button id="new-quote-button">New Quote</button>
+        </section>
+        <section id="github-section">
+            <h2>Trending Repositories</h2>
+            <button id="load-repos-button">Load Repos</button>
+            <ul id="repo-list"></ul>
+        </section>
+    </main>
+    <footer>
+        <p>Built with ❤ for research and engineering minds.</p>
+    </footer>
+    <script>
+        // To‑Do List Logic
+        (function() {
+            const taskInput = document.getElementById('new-task-input');
+            const addTaskBtn = document.getElementById('add-task-button');
+            const todoList = document.getElementById('todo-list');
+            let tasks = [];
+
+            // Load tasks from localStorage
+            function loadTasks() {
+                const stored = localStorage.getItem('tasks');
+                tasks = stored ? JSON.parse(stored) : [];
+                renderTasks();
+            }
+
+            // Save tasks to localStorage
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+
+            // Render tasks to DOM
+            function renderTasks() {
+                todoList.innerHTML = '';
+                tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = 'todo-item';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = task.done;
+                    checkbox.addEventListener('change', () => toggleTask(task.id));
+
+                    const span = document.createElement('span');
+                    span.className = 'todo-text' + (task.done ? ' completed' : '');
+                    span.textContent = task.text;
+                    span.addEventListener('click', () => toggleTask(task.id));
+
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'delete-button';
+                    delBtn.innerHTML = '×';
+                    delBtn.addEventListener('click', () => deleteTask(task.id));
+
+                    li.appendChild(checkbox);
+                    li.appendChild(span);
+                    li.appendChild(delBtn);
+                    todoList.appendChild(li);
+                });
+            }
+
+            function addTask() {
+                const text = taskInput.value.trim();
+                if (!text) return;
+                const newTask = {
+                    id: Date.now(),
+                    text: text,
+                    done: false
+                };
+                tasks.push(newTask);
+                saveTasks();
+                renderTasks();
+                taskInput.value = '';
+            }
+
+            function toggleTask(id) {
+                tasks = tasks.map(task => task.id === id ? { ...task, done: !task.done } : task);
+                saveTasks();
+                renderTasks();
+            }
+
+            function deleteTask(id) {
+                tasks = tasks.filter(task => task.id !== id);
+                saveTasks();
+                renderTasks();
+            }
+
+            addTaskBtn.addEventListener('click', addTask);
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTask();
+                }
+            });
+
+            loadTasks();
+        })();
+
+        // Quote Section Logic
+        (function() {
+            const quoteText = document.getElementById('quote-text');
+            const quoteAuthor = document.getElementById('quote-author');
+            const newQuoteBtn = document.getElementById('new-quote-button');
+
+            async function fetchRandomQuote() {
+                try {
+                    const res = await fetch('https://api.quotable.io/random');
+                    if (!res.ok) throw new Error('Network response was not ok');
+                    const data = await res.json();
+                    quoteText.textContent = data.content;
+                    quoteAuthor.textContent = '\u2014 ' + data.author;
+                } catch (error) {
+                    quoteText.textContent = 'Unable to fetch quote at the moment.';
+                    quoteAuthor.textContent = '';
+                }
+            }
+
+            newQuoteBtn.addEventListener('click', fetchRandomQuote);
+            fetchRandomQuote();
+        })();
+
+        // GitHub Trending Repositories Logic
+        (function() {
+            const repoList = document.getElementById('repo-list');
+            const loadReposBtn = document.getElementById('load-repos-button');
+
+            async function fetchTrendingRepos() {
+                repoList.innerHTML = '';
+                const loadingItem = document.createElement('li');
+                loadingItem.textContent = 'Loading...';
+                repoList.appendChild(loadingItem);
+                try {
+                    const res = await fetch('https://api.github.com/search/repositories?q=stars:%3E50000&sort=stars&order=desc&per_page=10');
+                    if (!res.ok) throw new Error('Failed to fetch repositories');
+                    const data = await res.json();
+                    repoList.innerHTML = '';
+                    data.items.forEach(repo => {
+                        const li = document.createElement('li');
+                        li.className = 'repo-item';
+                        const link = document.createElement('a');
+                        link.href = repo.html_url;
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        link.textContent = repo.full_name;
+                        const stars = document.createElement('span');
+                        stars.textContent = ` (★ ${repo.stargazers_count.toLocaleString()})`;
+                        li.appendChild(link);
+                        li.appendChild(stars);
+                        repoList.appendChild(li);
+                    });
+                } catch (error) {
+                    repoList.innerHTML = '';
+                    const errorItem = document.createElement('li');
+                    errorItem.textContent = 'Unable to fetch trending repositories.';
+                    repoList.appendChild(errorItem);
+                }
+            }
+
+            loadReposBtn.addEventListener('click', fetchTrendingRepos);
+        })();
+    </script>
+</body>
+</html>
